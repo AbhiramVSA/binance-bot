@@ -1,0 +1,427 @@
+"""
+Order Service for Binance Futures Trading Bot.
+Handles order creation, validation, and execution.
+"""
+from dataclasses import dataclass
+from decimal import Decimal
+from enum import Enum
+from typing import Any, Dict, Optional
+
+from src.api.client import BinanceFuturesClient, BinanceAPIError
+from src.utils.validators import validate_order_input, ValidationError
+from src.utils.logger import logger, log_order_submitted, log_order_result
+
+
+class OrderSide(Enum):
+    """Order side enumeration."""
+    BUY = "BUY"
+    SELL = "SELL"
+
+
+class OrderType(Enum):
+    """Order type enumeration."""
+    MARKET = "MARKET"
+    LIMIT = "LIMIT"
+    STOP = "STOP"
+    STOP_MARKET = "STOP_MARKET"
+    TAKE_PROFIT = "TAKE_PROFIT"
+    TAKE_PROFIT_MARKET = "TAKE_PROFIT_MARKET"
+
+
+class OrderStatus(Enum):
+    """Order status enumeration."""
+    NEW = "NEW"
+    PARTIALLY_FILLED = "PARTIALLY_FILLED"
+    FILLED = "FILLED"
+    CANCELED = "CANCELED"
+    REJECTED = "REJECTED"
+    EXPIRED = "EXPIRED"
+
+
+@dataclass
+class OrderRequest:
+    """Order request data class."""
+    symbol: str
+    side: str
+    order_type: str
+    quantity: Decimal
+    price: Optional[Decimal] = None
+    stop_price: Optional[Decimal] = None
+    time_in_force: str = "GTC"
+    reduce_only: bool = False
+
+
+@dataclass
+class OrderResult:
+    """Order result data class."""
+    success: bool
+    order_id: Optional[int] = None
+    client_order_id: Optional[str] = None
+    symbol: Optional[str] = None
+    status: Optional[str] = None
+    side: Optional[str] = None
+    order_type: Optional[str] = None
+    quantity: Optional[str] = None
+    price: Optional[str] = None
+    executed_qty: Optional[str] = None
+    avg_price: Optional[str] = None
+    message: Optional[str] = None
+    raw_response: Optional[Dict[str, Any]] = None
+    error_code: Optional[int] = None
+
+
+class OrderService:
+    """
+    Service class for managing orders.
+    Provides a high-level interface for order operations.
+    """
+    
+    def __init__(self, client: Optional[BinanceFuturesClient] = None):
+        """
+        Initialize OrderService.
+        
+        Args:
+            client: BinanceFuturesClient instance (creates new if not provided)
+        """
+        self.client = client or BinanceFuturesClient()
+    
+    def place_order(
+        self,
+        symbol: str,
+        side: str,
+        order_type: str,
+        quantity: str,
+        price: Optional[str] = None,
+        stop_price: Optional[str] = None,
+        time_in_force: str = "GTC",
+        reduce_only: bool = False
+    ) -> OrderResult:
+        """
+        Place a new order with validation.
+        
+        Args:
+            symbol: Trading pair symbol (e.g., BTCUSDT)
+            side: Order side (BUY or SELL)
+            order_type: Order type (MARKET, LIMIT, etc.)
+            quantity: Order quantity as string
+            price: Order price as string (for LIMIT orders)
+            stop_price: Stop price as string (for stop orders)
+            time_in_force: Time in force (GTC, IOC, FOK)
+            reduce_only: Whether order is reduce-only
+        
+        Returns:
+            OrderResult with order details or error information
+        """
+        try:
+            # Validate input
+            (
+                validated_symbol,
+                validated_side,
+                validated_type,
+                validated_qty,
+                validated_price,
+                validated_stop_price
+            ) = validate_order_input(symbol, side, order_type, quantity, price, stop_price)
+            
+            # Create order request
+            order_request = OrderRequest(
+                symbol=validated_symbol,
+                side=validated_side,
+                order_type=validated_type,
+                quantity=validated_qty,
+                price=validated_price,
+                stop_price=validated_stop_price,
+                time_in_force=time_in_force,
+                reduce_only=reduce_only
+            )
+            
+            log_order_submitted({
+                "symbol": order_request.symbol,
+                "side": order_request.side,
+                "type": order_request.order_type,
+                "quantity": str(order_request.quantity),
+                "price": str(order_request.price) if order_request.price else None,
+                "stop_price": str(order_request.stop_price) if order_request.stop_price else None,
+            })
+            
+            # Execute order
+            response = self.client.place_order(
+                symbol=order_request.symbol,
+                side=order_request.side,
+                order_type=order_request.order_type,
+                quantity=order_request.quantity,
+                price=order_request.price,
+                stop_price=order_request.stop_price,
+                time_in_force=order_request.time_in_force,
+                reduce_only=order_request.reduce_only
+            )
+            
+            result = OrderResult(
+                success=True,
+                order_id=response.get("orderId"),
+                client_order_id=response.get("clientOrderId"),
+                symbol=response.get("symbol"),
+                status=response.get("status"),
+                side=response.get("side"),
+                order_type=response.get("type"),
+                quantity=response.get("origQty"),
+                price=response.get("price"),
+                executed_qty=response.get("executedQty"),
+                avg_price=response.get("avgPrice"),
+                message="Order placed successfully",
+                raw_response=response
+            )
+            
+            log_order_result(True, response)
+            return result
+            
+        except ValidationError as e:
+            logger.error(f"Validation error: {str(e)}")
+            result = OrderResult(
+                success=False,
+                message=f"Validation error: {str(e)}"
+            )
+            log_order_result(False, {"error": str(e)})
+            return result
+            
+        except BinanceAPIError as e:
+            logger.error(f"API error: {str(e)}")
+            result = OrderResult(
+                success=False,
+                message=str(e),
+                error_code=e.code,
+                raw_response=e.response
+            )
+            log_order_result(False, {"error": str(e), "code": e.code})
+            return result
+            
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
+            result = OrderResult(
+                success=False,
+                message=f"Unexpected error: {str(e)}"
+            )
+            log_order_result(False, {"error": str(e)})
+            return result
+    
+    def place_market_order(
+        self,
+        symbol: str,
+        side: str,
+        quantity: str,
+        reduce_only: bool = False
+    ) -> OrderResult:
+        """
+        Convenience method for placing market orders.
+        
+        Args:
+            symbol: Trading pair symbol
+            side: Order side (BUY or SELL)
+            quantity: Order quantity
+            reduce_only: Whether order is reduce-only
+        
+        Returns:
+            OrderResult with order details
+        """
+        return self.place_order(
+            symbol=symbol,
+            side=side,
+            order_type="MARKET",
+            quantity=quantity,
+            reduce_only=reduce_only
+        )
+    
+    def place_limit_order(
+        self,
+        symbol: str,
+        side: str,
+        quantity: str,
+        price: str,
+        time_in_force: str = "GTC",
+        reduce_only: bool = False
+    ) -> OrderResult:
+        """
+        Convenience method for placing limit orders.
+        
+        Args:
+            symbol: Trading pair symbol
+            side: Order side (BUY or SELL)
+            quantity: Order quantity
+            price: Order price
+            time_in_force: Time in force
+            reduce_only: Whether order is reduce-only
+        
+        Returns:
+            OrderResult with order details
+        """
+        return self.place_order(
+            symbol=symbol,
+            side=side,
+            order_type="LIMIT",
+            quantity=quantity,
+            price=price,
+            time_in_force=time_in_force,
+            reduce_only=reduce_only
+        )
+    
+    def place_stop_market_order(
+        self,
+        symbol: str,
+        side: str,
+        quantity: str,
+        stop_price: str,
+        reduce_only: bool = False
+    ) -> OrderResult:
+        """
+        Place a stop-market order.
+        
+        Args:
+            symbol: Trading pair symbol
+            side: Order side (BUY or SELL)
+            quantity: Order quantity
+            stop_price: Stop trigger price
+            reduce_only: Whether order is reduce-only
+        
+        Returns:
+            OrderResult with order details
+        """
+        return self.place_order(
+            symbol=symbol,
+            side=side,
+            order_type="STOP_MARKET",
+            quantity=quantity,
+            stop_price=stop_price,
+            reduce_only=reduce_only
+        )
+    
+    def place_stop_limit_order(
+        self,
+        symbol: str,
+        side: str,
+        quantity: str,
+        price: str,
+        stop_price: str,
+        time_in_force: str = "GTC",
+        reduce_only: bool = False
+    ) -> OrderResult:
+        """
+        Place a stop-limit order.
+        
+        Args:
+            symbol: Trading pair symbol
+            side: Order side (BUY or SELL)
+            quantity: Order quantity
+            price: Limit price (price to execute at after stop is triggered)
+            stop_price: Stop trigger price
+            time_in_force: Time in force
+            reduce_only: Whether order is reduce-only
+        
+        Returns:
+            OrderResult with order details
+        """
+        return self.place_order(
+            symbol=symbol,
+            side=side,
+            order_type="STOP",
+            quantity=quantity,
+            price=price,
+            stop_price=stop_price,
+            time_in_force=time_in_force,
+            reduce_only=reduce_only
+        )
+    
+    def place_take_profit_market_order(
+        self,
+        symbol: str,
+        side: str,
+        quantity: str,
+        stop_price: str,
+        reduce_only: bool = False
+    ) -> OrderResult:
+        """
+        Place a take-profit market order.
+        
+        Args:
+            symbol: Trading pair symbol
+            side: Order side (BUY or SELL)
+            quantity: Order quantity
+            stop_price: Take-profit trigger price
+            reduce_only: Whether order is reduce-only
+        
+        Returns:
+            OrderResult with order details
+        """
+        return self.place_order(
+            symbol=symbol,
+            side=side,
+            order_type="TAKE_PROFIT_MARKET",
+            quantity=quantity,
+            stop_price=stop_price,
+            reduce_only=reduce_only
+        )
+    
+    def cancel_order(self, symbol: str, order_id: int) -> OrderResult:
+        """
+        Cancel an existing order.
+        
+        Args:
+            symbol: Trading pair symbol
+            order_id: Order ID to cancel
+        
+        Returns:
+            OrderResult with cancellation details
+        """
+        try:
+            response = self.client.cancel_order(symbol=symbol, order_id=order_id)
+            
+            return OrderResult(
+                success=True,
+                order_id=response.get("orderId"),
+                symbol=response.get("symbol"),
+                status=response.get("status"),
+                message="Order cancelled successfully",
+                raw_response=response
+            )
+            
+        except BinanceAPIError as e:
+            logger.error(f"Cancel order error: {str(e)}")
+            return OrderResult(
+                success=False,
+                message=str(e),
+                error_code=e.code,
+                raw_response=e.response
+            )
+    
+    def get_open_orders(self, symbol: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Get all open orders.
+        
+        Args:
+            symbol: Trading pair symbol (optional)
+        
+        Returns:
+            List of open orders or error information
+        """
+        try:
+            orders = self.client.get_open_orders(symbol)
+            return {"success": True, "orders": orders}
+        except BinanceAPIError as e:
+            logger.error(f"Get open orders error: {str(e)}")
+            return {"success": False, "error": str(e), "code": e.code}
+    
+    def get_positions(self, symbol: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Get position information.
+        
+        Args:
+            symbol: Trading pair symbol (optional)
+        
+        Returns:
+            Position information or error
+        """
+        try:
+            positions = self.client.get_positions(symbol)
+            return {"success": True, "positions": positions}
+        except BinanceAPIError as e:
+            logger.error(f"Get positions error: {str(e)}")
+            return {"success": False, "error": str(e), "code": e.code}
