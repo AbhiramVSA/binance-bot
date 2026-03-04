@@ -39,23 +39,14 @@ class OrderResult:
     executed_qty: str | None = None
     avg_price: str | None = None
     message: str | None = None
-    raw_response: Optional[dict[str, Any]] = None
+    raw_response: dict[str, Any] | None = None
     error_code: int | None = None
 
 
 class OrderService:
-    """
-    Service class for managing orders.
-    Provides a high-level interface for order operations.
-    """
-    
+    """High-level interface for order management with input validation."""
+
     def __init__(self, client: BinanceFuturesClient | None = None):
-        """
-        Initialize OrderService.
-        
-        Args:
-            client: BinanceFuturesClient instance (creates new if not provided)
-        """
         self.client = client or BinanceFuturesClient()
     
     def place_order(
@@ -69,22 +60,7 @@ class OrderService:
         time_in_force: str = "GTC",
         reduce_only: bool = False
     ) -> OrderResult:
-        """
-        Place a new order with validation.
-        
-        Args:
-            symbol: Trading pair symbol (e.g., BTCUSDT)
-            side: Order side (BUY or SELL)
-            order_type: Order type (MARKET, LIMIT, etc.)
-            quantity: Order quantity as string
-            price: Order price as string (for LIMIT orders)
-            stop_price: Stop price as string (for stop orders)
-            time_in_force: Time in force (GTC, IOC, FOK)
-            reduce_only: Whether order is reduce-only
-        
-        Returns:
-            OrderResult with order details or error information
-        """
+        """Validate inputs and place an order. Returns OrderResult (never raises)."""
         try:
             # Validate input
             (
@@ -184,18 +160,7 @@ class OrderService:
         quantity: str,
         reduce_only: bool = False
     ) -> OrderResult:
-        """
-        Convenience method for placing market orders.
-        
-        Args:
-            symbol: Trading pair symbol
-            side: Order side (BUY or SELL)
-            quantity: Order quantity
-            reduce_only: Whether order is reduce-only
-        
-        Returns:
-            OrderResult with order details
-        """
+        """Place a market order."""
         return self.place_order(
             symbol=symbol,
             side=side,
@@ -213,20 +178,7 @@ class OrderService:
         time_in_force: str = "GTC",
         reduce_only: bool = False
     ) -> OrderResult:
-        """
-        Convenience method for placing limit orders.
-        
-        Args:
-            symbol: Trading pair symbol
-            side: Order side (BUY or SELL)
-            quantity: Order quantity
-            price: Order price
-            time_in_force: Time in force
-            reduce_only: Whether order is reduce-only
-        
-        Returns:
-            OrderResult with order details
-        """
+        """Place a limit order."""
         return self.place_order(
             symbol=symbol,
             side=side,
@@ -245,19 +197,7 @@ class OrderService:
         stop_price: str,
         reduce_only: bool = False
     ) -> OrderResult:
-        """
-        Place a stop-market order.
-        
-        Args:
-            symbol: Trading pair symbol
-            side: Order side (BUY or SELL)
-            quantity: Order quantity
-            stop_price: Stop trigger price
-            reduce_only: Whether order is reduce-only
-        
-        Returns:
-            OrderResult with order details
-        """
+        """Place a stop-market order."""
         return self.place_order(
             symbol=symbol,
             side=side,
@@ -277,21 +217,7 @@ class OrderService:
         time_in_force: str = "GTC",
         reduce_only: bool = False
     ) -> OrderResult:
-        """
-        Place a stop-limit order.
-        
-        Args:
-            symbol: Trading pair symbol
-            side: Order side (BUY or SELL)
-            quantity: Order quantity
-            price: Limit price (price to execute at after stop is triggered)
-            stop_price: Stop trigger price
-            time_in_force: Time in force
-            reduce_only: Whether order is reduce-only
-        
-        Returns:
-            OrderResult with order details
-        """
+        """Place a stop-limit order."""
         return self.place_order(
             symbol=symbol,
             side=side,
@@ -311,19 +237,7 @@ class OrderService:
         stop_price: str,
         reduce_only: bool = False
     ) -> OrderResult:
-        """
-        Place a take-profit market order.
-        
-        Args:
-            symbol: Trading pair symbol
-            side: Order side (BUY or SELL)
-            quantity: Order quantity
-            stop_price: Take-profit trigger price
-            reduce_only: Whether order is reduce-only
-        
-        Returns:
-            OrderResult with order details
-        """
+        """Place a take-profit market order."""
         return self.place_order(
             symbol=symbol,
             side=side,
@@ -334,16 +248,7 @@ class OrderService:
         )
     
     def cancel_order(self, symbol: str, order_id: int) -> OrderResult:
-        """
-        Cancel an existing order.
-        
-        Args:
-            symbol: Trading pair symbol
-            order_id: Order ID to cancel
-        
-        Returns:
-            OrderResult with cancellation details
-        """
+        """Cancel an existing order by ID."""
         try:
             response = self.client.cancel_order(symbol=symbol, order_id=order_id)
             
@@ -366,15 +271,7 @@ class OrderService:
             )
     
     def get_open_orders(self, symbol: str | None = None) -> dict[str, Any]:
-        """
-        Get all open orders.
-        
-        Args:
-            symbol: Trading pair symbol (optional)
-        
-        Returns:
-            List of open orders or error information
-        """
+        """Get open orders, optionally filtered by symbol."""
         try:
             orders = self.client.get_open_orders(symbol)
             return {"success": True, "orders": orders}
@@ -383,15 +280,7 @@ class OrderService:
             return {"success": False, "error": str(e), "code": e.code}
     
     def get_positions(self, symbol: str | None = None) -> dict[str, Any]:
-        """
-        Get position information.
-        
-        Args:
-            symbol: Trading pair symbol (optional)
-        
-        Returns:
-            Position information or error
-        """
+        """Get position information, optionally filtered by symbol."""
         try:
             positions = self.client.get_positions(symbol)
             return {"success": True, "positions": positions}

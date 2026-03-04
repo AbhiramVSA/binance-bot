@@ -83,15 +83,7 @@ class BinanceFuturesClient:
         return int(time.time() * 1000)
     
     def _sign_request(self, params: dict[str, Any]) -> str:
-        """
-        Create HMAC SHA256 signature for request.
-        
-        Args:
-            params: Request parameters
-        
-        Returns:
-            Signature string
-        """
+        """Create HMAC SHA256 signature for the given request parameters."""
         query_string = urlencode(params)
         signature = hmac.new(
             self.api_secret.encode("utf-8"),
@@ -104,24 +96,10 @@ class BinanceFuturesClient:
         self,
         method: str,
         endpoint: str,
-        params: Optional[dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
         signed: bool = False
     ) -> dict[str, Any]:
-        """
-        Make HTTP request to Binance API.
-        
-        Args:
-            method: HTTP method (GET, POST, DELETE)
-            endpoint: API endpoint
-            params: Request parameters
-            signed: Whether request needs signature
-        
-        Returns:
-            API response as dictionary
-        
-        Raises:
-            BinanceAPIError: If API returns an error
-        """
+        """Send a signed or unsigned request to the Binance API."""
         url = f"{self.base_url}{endpoint}"
         params = params or {}
         
@@ -176,15 +154,7 @@ class BinanceFuturesClient:
         return self._make_request("GET", self.ENDPOINTS["exchange_info"])
     
     def get_ticker_price(self, symbol: str | None = None) -> dict[str, Any]:
-        """
-        Get latest price for a symbol or all symbols.
-        
-        Args:
-            symbol: Trading pair symbol (optional)
-        
-        Returns:
-            Price information
-        """
+        """Get latest price for a symbol or all symbols."""
         params = {}
         if symbol:
             params["symbol"] = symbol
@@ -197,30 +167,14 @@ class BinanceFuturesClient:
         return self._make_request("GET", self.ENDPOINTS["account"], signed=True)
     
     def get_positions(self, symbol: str | None = None) -> dict[str, Any]:
-        """
-        Get position information.
-        
-        Args:
-            symbol: Trading pair symbol (optional)
-        
-        Returns:
-            Position information
-        """
+        """Get position information, optionally filtered by symbol."""
         params = {}
         if symbol:
             params["symbol"] = symbol
         return self._make_request("GET", self.ENDPOINTS["position"], params, signed=True)
     
     def get_open_orders(self, symbol: str | None = None) -> dict[str, Any]:
-        """
-        Get all open orders.
-        
-        Args:
-            symbol: Trading pair symbol (optional)
-        
-        Returns:
-            List of open orders
-        """
+        """Get all open orders, optionally filtered by symbol."""
         params = {}
         if symbol:
             params["symbol"] = symbol
@@ -240,28 +194,7 @@ class BinanceFuturesClient:
         position_side: str = "BOTH",
         working_type: str = "CONTRACT_PRICE"
     ) -> dict[str, Any]:
-        """
-        Place a new order.
-        
-        Args:
-            symbol: Trading pair symbol (e.g., BTCUSDT)
-            side: Order side (BUY or SELL)
-            order_type: Order type (MARKET, LIMIT, STOP, STOP_MARKET, etc.)
-            quantity: Order quantity
-            price: Order price (required for LIMIT orders)
-            stop_price: Stop price (required for STOP orders)
-            time_in_force: Time in force (GTC, IOC, FOK)
-            reduce_only: Reduce only flag
-            close_position: Close position flag
-            position_side: Position side (BOTH, LONG, SHORT)
-            working_type: Working type (MARK_PRICE, CONTRACT_PRICE)
-        
-        Returns:
-            Order response from Binance API
-        
-        Raises:
-            BinanceAPIError: If order placement fails
-        """
+        """Place a new futures order. Raises BinanceAPIError on failure."""
         params = {
             "symbol": symbol,
             "side": side,
@@ -302,20 +235,7 @@ class BinanceFuturesClient:
         return self._make_request("POST", self.ENDPOINTS["order"], params, signed=True)
     
     def cancel_order(self, symbol: str, order_id: int | None = None, client_order_id: str | None = None) -> dict[str, Any]:
-        """
-        Cancel an existing order.
-        
-        Args:
-            symbol: Trading pair symbol
-            order_id: Order ID (either order_id or client_order_id required)
-            client_order_id: Client order ID
-        
-        Returns:
-            Cancelled order details
-        
-        Raises:
-            BinanceAPIError: If cancellation fails
-        """
+        """Cancel an order by order_id or client_order_id."""
         if not order_id and not client_order_id:
             raise BinanceAPIError("Either order_id or client_order_id is required")
         
@@ -328,14 +248,6 @@ class BinanceFuturesClient:
         return self._make_request("DELETE", self.ENDPOINTS["order"], params, signed=True)
     
     def cancel_all_orders(self, symbol: str) -> dict[str, Any]:
-        """
-        Cancel all open orders for a symbol.
-        
-        Args:
-            symbol: Trading pair symbol
-        
-        Returns:
-            Cancellation result
-        """
+        """Cancel all open orders for a symbol."""
         params = {"symbol": symbol}
         return self._make_request("DELETE", self.ENDPOINTS["open_orders"], params, signed=True)
