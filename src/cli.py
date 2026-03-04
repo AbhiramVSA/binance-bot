@@ -3,7 +3,7 @@ Command Line Interface for Binance Futures Trading Bot.
 Provides interactive prompts for user input and displays order results.
 """
 
-from src.api.client import BinanceFuturesClient
+from src.api.client import BinanceFuturesClient, BinanceAPIError
 from src.controllers.order_service import OrderService, OrderResult
 from src.config.config import settings
 from src.utils.logger import logger
@@ -115,8 +115,8 @@ class TradingCLI:
             except KeyboardInterrupt:
                 print("\n\nInterrupted. Goodbye!")
                 break
-            except Exception as e:
-                logger.error(f"Unexpected error in CLI: {e}")
+            except (BinanceAPIError, ValueError, OSError) as e:
+                logger.error(f"Error in CLI: {e}")
                 print(f"\nError: {e}")
     
     def _print_header(self) -> None:
