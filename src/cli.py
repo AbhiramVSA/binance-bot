@@ -1,7 +1,4 @@
-"""
-Command Line Interface for Binance Futures Trading Bot.
-Provides interactive prompts for user input and displays order results.
-"""
+"""Interactive CLI and quick-order interface for the trading bot."""
 
 from src.api.client import BinanceFuturesClient, BinanceAPIError
 from src.controllers.order_service import OrderService, OrderResult

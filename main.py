@@ -1,18 +1,4 @@
-"""
-Binance Futures Trading Bot - Main Entry Point
-
-A simplified trading bot for Binance Futures Testnet.
-Supports MARKET, LIMIT, and advanced order types (STOP, TAKE_PROFIT).
-
-Usage:
-    python main.py              # Run interactive CLI
-    python main.py --help       # Show help
-
-Environment Variables:
-    BINANCE_API_KEY     - Your Binance API key
-    BINANCE_API_SECRET  - Your Binance API secret
-    USE_TESTNET         - Use testnet (default: True)
-"""
+"""Binance Futures Trading Bot - entry point for interactive and quick-order modes."""
 import argparse
 import sys
 
@@ -22,7 +8,6 @@ from src.utils.logger import logger
 
 
 def parse_arguments() -> argparse.Namespace:
-    """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Binance Futures Trading Bot (Testnet)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -113,31 +98,25 @@ Environment:
 
 
 def main():
-    """Main entry point for the trading bot."""
     args = parse_arguments()
     
-    # Configure logging level
     if args.verbose:
         import logging
         logger.setLevel(logging.DEBUG)
     
-    # Determine environment
     use_testnet = not args.mainnet
-    
+
     if not use_testnet:
         print("\n⚠️  WARNING: Running in MAINNET mode!")
         print("    This will use REAL money. Press Ctrl+C to cancel.")
         print("-" * 50)
     
-    # Quick order mode
     if args.quick:
-        # Validate required arguments
         if not all([args.symbol, args.side, args.order_type, args.quantity]):
             print("Error: Quick mode requires --symbol, --side, --type, and --quantity")
             print("Example: python main.py --quick -s BTCUSDT -S BUY -t MARKET -q 0.001")
             sys.exit(1)
         
-        # Get API credentials
         api_key = args.api_key or settings.BINANCE_API_KEY
         api_secret = args.api_secret or settings.BINANCE_API_SECRET
         
@@ -146,7 +125,6 @@ def main():
             print("Set BINANCE_API_KEY and BINANCE_API_SECRET in .env or pass --api-key and --api-secret")
             sys.exit(1)
         
-        # Place order
         result = quick_order(
             symbol=args.symbol.upper(),
             side=args.side.upper(),
@@ -159,7 +137,6 @@ def main():
             use_testnet=use_testnet
         )
         
-        # Display result
         if result.success:
             print("\n✅ Order placed successfully!")
             print(f"   Order ID: {result.order_id}")

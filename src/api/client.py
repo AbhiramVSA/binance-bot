@@ -1,7 +1,4 @@
-"""
-Binance Futures API Client.
-Handles authentication, request signing, and API communication.
-"""
+"""Binance Futures API client with HMAC authentication and request signing."""
 import hashlib
 import hmac
 import time

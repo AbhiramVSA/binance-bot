@@ -1,7 +1,4 @@
-"""
-Order Service for Binance Futures Trading Bot.
-Handles order creation, validation, and execution.
-"""
+"""Order management service with validation and error handling."""
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any

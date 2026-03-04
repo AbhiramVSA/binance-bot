@@ -1,7 +1,4 @@
-"""
-Configuration module for Binance Futures Trading Bot.
-Handles API credentials and environment settings.
-"""
+"""Application settings loaded from environment variables or .env file."""
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
