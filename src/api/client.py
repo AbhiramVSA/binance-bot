@@ -29,7 +29,9 @@ class BinanceFuturesClient:
     Client for Binance Futures API (USDT-M).
     Supports both testnet and mainnet.
     """
-    
+
+    REQUEST_TIMEOUT = 10  # seconds
+
     # API Endpoints
     ENDPOINTS = {
         "order": "/fapi/v1/order",
@@ -131,11 +133,11 @@ class BinanceFuturesClient:
         
         try:
             if method == "GET":
-                response = self.session.get(url, params=params)
+                response = self.session.get(url, params=params, timeout=self.REQUEST_TIMEOUT)
             elif method == "POST":
-                response = self.session.post(url, data=params)
+                response = self.session.post(url, data=params, timeout=self.REQUEST_TIMEOUT)
             elif method == "DELETE":
-                response = self.session.delete(url, params=params)
+                response = self.session.delete(url, params=params, timeout=self.REQUEST_TIMEOUT)
             else:
                 raise ValueError(f"Unsupported HTTP method: {method}")
             
