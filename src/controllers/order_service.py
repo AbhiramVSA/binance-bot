@@ -4,7 +4,7 @@ Handles order creation, validation, and execution.
 """
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Any, Dict, Optional
+from typing import Any
 
 from src.api.client import BinanceFuturesClient, BinanceAPIError
 from src.utils.validators import validate_order_input, ValidationError
@@ -18,8 +18,8 @@ class OrderRequest:
     side: str
     order_type: str
     quantity: Decimal
-    price: Optional[Decimal] = None
-    stop_price: Optional[Decimal] = None
+    price: Decimal | None = None
+    stop_price: Decimal | None = None
     time_in_force: str = "GTC"
     reduce_only: bool = False
 
@@ -28,19 +28,19 @@ class OrderRequest:
 class OrderResult:
     """Order result data class."""
     success: bool
-    order_id: Optional[int] = None
-    client_order_id: Optional[str] = None
-    symbol: Optional[str] = None
-    status: Optional[str] = None
-    side: Optional[str] = None
-    order_type: Optional[str] = None
-    quantity: Optional[str] = None
-    price: Optional[str] = None
-    executed_qty: Optional[str] = None
-    avg_price: Optional[str] = None
-    message: Optional[str] = None
-    raw_response: Optional[Dict[str, Any]] = None
-    error_code: Optional[int] = None
+    order_id: int | None = None
+    client_order_id: str | None = None
+    symbol: str | None = None
+    status: str | None = None
+    side: str | None = None
+    order_type: str | None = None
+    quantity: str | None = None
+    price: str | None = None
+    executed_qty: str | None = None
+    avg_price: str | None = None
+    message: str | None = None
+    raw_response: Optional[dict[str, Any]] = None
+    error_code: int | None = None
 
 
 class OrderService:
@@ -49,7 +49,7 @@ class OrderService:
     Provides a high-level interface for order operations.
     """
     
-    def __init__(self, client: Optional[BinanceFuturesClient] = None):
+    def __init__(self, client: BinanceFuturesClient | None = None):
         """
         Initialize OrderService.
         
@@ -64,8 +64,8 @@ class OrderService:
         side: str,
         order_type: str,
         quantity: str,
-        price: Optional[str] = None,
-        stop_price: Optional[str] = None,
+        price: str | None = None,
+        stop_price: str | None = None,
         time_in_force: str = "GTC",
         reduce_only: bool = False
     ) -> OrderResult:
@@ -365,7 +365,7 @@ class OrderService:
                 raw_response=e.response
             )
     
-    def get_open_orders(self, symbol: Optional[str] = None) -> Dict[str, Any]:
+    def get_open_orders(self, symbol: str | None = None) -> dict[str, Any]:
         """
         Get all open orders.
         
@@ -382,7 +382,7 @@ class OrderService:
             logger.error(f"Get open orders error: {str(e)}")
             return {"success": False, "error": str(e), "code": e.code}
     
-    def get_positions(self, symbol: Optional[str] = None) -> Dict[str, Any]:
+    def get_positions(self, symbol: str | None = None) -> dict[str, Any]:
         """
         Get position information.
         

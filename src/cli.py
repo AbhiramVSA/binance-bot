@@ -2,7 +2,6 @@
 Command Line Interface for Binance Futures Trading Bot.
 Provides interactive prompts for user input and displays order results.
 """
-from typing import Optional
 
 from src.api.client import BinanceFuturesClient
 from src.controllers.order_service import OrderService, OrderResult
@@ -38,7 +37,7 @@ class TradingCLI:
         "0": "Exit"
     }
     
-    def __init__(self, order_service: Optional[OrderService] = None):
+    def __init__(self, order_service: OrderService | None = None):
         """
         Initialize CLI.
         
@@ -149,7 +148,7 @@ class TradingCLI:
         print("-" * 40)
         return input("Select option: ").strip()
     
-    def _prompt(self, message: str, required: bool = False, default: Optional[str] = None) -> str:
+    def _prompt(self, message: str, required: bool = False, default: str | None = None) -> str:
         """
         Prompt user for input.
         
@@ -429,10 +428,10 @@ def quick_order(
     side: str,
     order_type: str,
     quantity: str,
-    price: Optional[str] = None,
-    stop_price: Optional[str] = None,
-    api_key: Optional[str] = None,
-    api_secret: Optional[str] = None,
+    price: str | None = None,
+    stop_price: str | None = None,
+    api_key: str | None = None,
+    api_secret: str | None = None,
     use_testnet: bool = True
 ) -> OrderResult:
     """

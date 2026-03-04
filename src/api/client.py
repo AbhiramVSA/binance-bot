@@ -6,7 +6,7 @@ import hashlib
 import hmac
 import time
 from decimal import Decimal
-from typing import Any, Dict, Optional
+from typing import Any
 from urllib.parse import urlencode
 
 import requests
@@ -18,7 +18,7 @@ from src.utils.logger import logger, log_api_request, log_api_response, log_api_
 class BinanceAPIError(Exception):
     """Custom exception for Binance API errors."""
     
-    def __init__(self, message: str, code: Optional[int] = None, response: Optional[dict] = None):
+    def __init__(self, message: str, code: int | None = None, response: dict | None = None):
         super().__init__(message)
         self.code = code
         self.response = response
@@ -46,9 +46,9 @@ class BinanceFuturesClient:
     
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        api_secret: Optional[str] = None,
-        use_testnet: Optional[bool] = None
+        api_key: str | None = None,
+        api_secret: str | None = None,
+        use_testnet: bool | None = None
     ):
         """
         Initialize the Binance Futures client.
@@ -82,7 +82,7 @@ class BinanceFuturesClient:
         """Get current timestamp in milliseconds."""
         return int(time.time() * 1000)
     
-    def _sign_request(self, params: Dict[str, Any]) -> str:
+    def _sign_request(self, params: dict[str, Any]) -> str:
         """
         Create HMAC SHA256 signature for request.
         
@@ -104,9 +104,9 @@ class BinanceFuturesClient:
         self,
         method: str,
         endpoint: str,
-        params: Optional[Dict[str, Any]] = None,
+        params: Optional[dict[str, Any]] = None,
         signed: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Make HTTP request to Binance API.
         
@@ -167,15 +167,15 @@ class BinanceFuturesClient:
     
     # Public Endpoints (no signature required)
     
-    def get_server_time(self) -> Dict[str, Any]:
+    def get_server_time(self) -> dict[str, Any]:
         """Get Binance server time."""
         return self._make_request("GET", self.ENDPOINTS["server_time"])
     
-    def get_exchange_info(self) -> Dict[str, Any]:
+    def get_exchange_info(self) -> dict[str, Any]:
         """Get exchange trading rules and symbol information."""
         return self._make_request("GET", self.ENDPOINTS["exchange_info"])
     
-    def get_ticker_price(self, symbol: Optional[str] = None) -> Dict[str, Any]:
+    def get_ticker_price(self, symbol: str | None = None) -> dict[str, Any]:
         """
         Get latest price for a symbol or all symbols.
         
@@ -192,11 +192,11 @@ class BinanceFuturesClient:
     
     # Private Endpoints (signature required)
     
-    def get_account_info(self) -> Dict[str, Any]:
+    def get_account_info(self) -> dict[str, Any]:
         """Get account information including balances and positions."""
         return self._make_request("GET", self.ENDPOINTS["account"], signed=True)
     
-    def get_positions(self, symbol: Optional[str] = None) -> Dict[str, Any]:
+    def get_positions(self, symbol: str | None = None) -> dict[str, Any]:
         """
         Get position information.
         
@@ -211,7 +211,7 @@ class BinanceFuturesClient:
             params["symbol"] = symbol
         return self._make_request("GET", self.ENDPOINTS["position"], params, signed=True)
     
-    def get_open_orders(self, symbol: Optional[str] = None) -> Dict[str, Any]:
+    def get_open_orders(self, symbol: str | None = None) -> dict[str, Any]:
         """
         Get all open orders.
         
@@ -232,14 +232,14 @@ class BinanceFuturesClient:
         side: str,
         order_type: str,
         quantity: Decimal,
-        price: Optional[Decimal] = None,
-        stop_price: Optional[Decimal] = None,
+        price: Decimal | None = None,
+        stop_price: Decimal | None = None,
         time_in_force: str = "GTC",
         reduce_only: bool = False,
         close_position: bool = False,
         position_side: str = "BOTH",
         working_type: str = "CONTRACT_PRICE"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Place a new order.
         
@@ -301,7 +301,7 @@ class BinanceFuturesClient:
         
         return self._make_request("POST", self.ENDPOINTS["order"], params, signed=True)
     
-    def cancel_order(self, symbol: str, order_id: Optional[int] = None, client_order_id: Optional[str] = None) -> Dict[str, Any]:
+    def cancel_order(self, symbol: str, order_id: int | None = None, client_order_id: str | None = None) -> dict[str, Any]:
         """
         Cancel an existing order.
         
@@ -327,7 +327,7 @@ class BinanceFuturesClient:
         
         return self._make_request("DELETE", self.ENDPOINTS["order"], params, signed=True)
     
-    def cancel_all_orders(self, symbol: str) -> Dict[str, Any]:
+    def cancel_all_orders(self, symbol: str) -> dict[str, Any]:
         """
         Cancel all open orders for a symbol.
         

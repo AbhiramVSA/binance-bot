@@ -4,16 +4,15 @@ Provides centralized logging configuration and functions.
 """
 import logging
 import sys
-from typing import Optional
 
 from src.config.config import settings
 
 
 def setup_logger(
     name: str = "binance_bot",
-    level: Optional[str] = None,
-    log_to_file: Optional[bool] = None,
-    log_file_path: Optional[str] = None
+    level: str | None = None,
+    log_to_file: bool | None = None,
+    log_file_path: str | None = None
 ) -> logging.Logger:
     """
     Set up and configure a logger instance.
@@ -61,7 +60,7 @@ def setup_logger(
 logger = setup_logger()
 
 
-def log_api_request(method: str, url: str, params: Optional[dict] = None) -> None:
+def log_api_request(method: str, url: str, params: dict | None = None) -> None:
     """Log an API request."""
     params_str = f" | Params: {_sanitize_params(params)}" if params else ""
     logger.info(f"API Request: {method} {url}{params_str}")
@@ -72,7 +71,7 @@ def log_api_response(status_code: int, response_data: dict) -> None:
     logger.info(f"API Response: Status {status_code} | Data: {response_data}")
 
 
-def log_api_error(error: Exception, context: Optional[str] = None) -> None:
+def log_api_error(error: Exception, context: str | None = None) -> None:
     """Log an API error."""
     context_str = f" | Context: {context}" if context else ""
     logger.error(f"API Error: {type(error).__name__}: {str(error)}{context_str}")
@@ -91,7 +90,7 @@ def log_order_result(success: bool, result: dict) -> None:
         logger.error(f"Order Failed: {result}")
 
 
-def _sanitize_params(params: Optional[dict]) -> dict:
+def _sanitize_params(params: dict | None) -> dict:
     """Sanitize parameters by hiding sensitive data."""
     if not params:
         return {}

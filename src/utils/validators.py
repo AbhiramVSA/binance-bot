@@ -3,7 +3,6 @@ Input validation utilities for Binance Futures Trading Bot.
 Validates user input before sending to the API.
 """
 from decimal import Decimal, InvalidOperation
-from typing import Optional, Tuple
 
 
 class ValidationError(Exception):
@@ -132,7 +131,7 @@ def validate_quantity(quantity: str) -> Decimal:
     return qty
 
 
-def validate_price(price: Optional[str], order_type: str) -> Optional[Decimal]:
+def validate_price(price: str | None, order_type: str) -> Decimal | None:
     """
     Validate order price.
     
@@ -176,7 +175,7 @@ def validate_price(price: Optional[str], order_type: str) -> Optional[Decimal]:
     return None
 
 
-def validate_stop_price(stop_price: Optional[str], order_type: str) -> Optional[Decimal]:
+def validate_stop_price(stop_price: str | None, order_type: str) -> Decimal | None:
     """
     Validate stop price for stop orders.
     
@@ -214,9 +213,9 @@ def validate_order_input(
     side: str,
     order_type: str,
     quantity: str,
-    price: Optional[str] = None,
-    stop_price: Optional[str] = None
-) -> Tuple[str, str, str, Decimal, Optional[Decimal], Optional[Decimal]]:
+    price: str | None = None,
+    stop_price: str | None = None
+) -> tuple[str, str, str, Decimal, Decimal | None, Decimal | None]:
     """
     Validate all order input parameters.
     
