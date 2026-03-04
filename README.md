@@ -14,6 +14,7 @@ src/controllers/            Order validation + execution
 src/api/client.py           Binance REST API client (HMAC-signed)
 src/config/                 Settings from .env / environment
 src/utils/                  Logging and input validation
+tests/                      Unit tests (pytest)
 ```
 
 **Data flow:** User input → `OrderService` (validates) → `BinanceFuturesClient` (signs & sends) → Binance API
