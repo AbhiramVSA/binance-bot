@@ -84,10 +84,12 @@ class TradingCLI:
     def run(self) -> None:
         """Run the CLI main loop."""
         self._print_header()
-        
+
         if not self._ensure_initialized():
             print("Failed to initialize. Exiting.")
             return
+
+        self._print_status()
         
         while True:
             try:
@@ -121,11 +123,20 @@ class TradingCLI:
     def _print_header(self) -> None:
         """Print application header."""
         print("\n" + "=" * 60)
-        print("  🤖 BINANCE FUTURES TRADING BOT (TESTNET)")
+        print("  BINANCE FUTURES TRADING BOT")
         print("=" * 60)
-        env = "TESTNET" if settings.USE_TESTNET else "MAINNET"
-        print(f"  Environment: {env}")
-        print(f"  API URL: {settings.base_url}")
+
+    def _print_status(self) -> None:
+        """Print connection status after initialization."""
+        if self.order_service and self.order_service.client:
+            client = self.order_service.client
+            env = "TESTNET" if client.use_testnet else "MAINNET"
+            print(f"  Environment: {env}")
+            print(f"  API URL: {client.base_url}")
+        else:
+            env = "TESTNET" if settings.USE_TESTNET else "MAINNET"
+            print(f"  Environment: {env}")
+            print(f"  API URL: {settings.base_url}")
         print("=" * 60)
     
     def _show_menu(self) -> str:
@@ -195,11 +206,11 @@ class TradingCLI:
         
         # Select order type first
         print("\nOrder Types:")
-        order_types = ["MARKET", "LIMIT", "STOP_MARKET", "STOP", "TAKE_PROFIT_MARKET"]
+        order_types = ["MARKET", "LIMIT", "STOP_MARKET", "STOP", "TAKE_PROFIT_MARKET", "TAKE_PROFIT"]
         for i, ot in enumerate(order_types, 1):
             print(f"  [{i}] {ot}")
-        
-        type_choice = self._prompt("Select order type (1-5): ", required=True)
+
+        type_choice = self._prompt(f"Select order type (1-{len(order_types)}): ", required=True)
         try:
             order_type = order_types[int(type_choice) - 1]
         except (ValueError, IndexError):
@@ -226,6 +237,9 @@ class TradingCLI:
             price = self._prompt("Limit Price (execution): ", required=True)
         elif order_type == "TAKE_PROFIT_MARKET":
             stop_price = self._prompt("Take Profit Price: ", required=True)
+        elif order_type == "TAKE_PROFIT":
+            stop_price = self._prompt("Take Profit Price (trigger): ", required=True)
+            price = self._prompt("Limit Price (execution): ", required=True)
         
         reduce_only = self._prompt_yes_no("Reduce Only?", default=False)
         
