@@ -2,8 +2,7 @@
 Command Line Interface for Binance Futures Trading Bot.
 Provides interactive prompts for user input and displays order results.
 """
-import sys
-from typing import Optional, Tuple
+from typing import Optional
 
 from src.api.client import BinanceFuturesClient
 from src.controllers.order_service import OrderService, OrderResult

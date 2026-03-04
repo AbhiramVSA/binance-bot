@@ -4,38 +4,11 @@ Handles order creation, validation, and execution.
 """
 from dataclasses import dataclass
 from decimal import Decimal
-from enum import Enum
 from typing import Any, Dict, Optional
 
 from src.api.client import BinanceFuturesClient, BinanceAPIError
 from src.utils.validators import validate_order_input, ValidationError
 from src.utils.logger import logger, log_order_submitted, log_order_result
-
-
-class OrderSide(Enum):
-    """Order side enumeration."""
-    BUY = "BUY"
-    SELL = "SELL"
-
-
-class OrderType(Enum):
-    """Order type enumeration."""
-    MARKET = "MARKET"
-    LIMIT = "LIMIT"
-    STOP = "STOP"
-    STOP_MARKET = "STOP_MARKET"
-    TAKE_PROFIT = "TAKE_PROFIT"
-    TAKE_PROFIT_MARKET = "TAKE_PROFIT_MARKET"
-
-
-class OrderStatus(Enum):
-    """Order status enumeration."""
-    NEW = "NEW"
-    PARTIALLY_FILLED = "PARTIALLY_FILLED"
-    FILLED = "FILLED"
-    CANCELED = "CANCELED"
-    REJECTED = "REJECTED"
-    EXPIRED = "EXPIRED"
 
 
 @dataclass

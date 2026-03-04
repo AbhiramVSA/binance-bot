@@ -15,7 +15,6 @@ Environment Variables:
 """
 import argparse
 import sys
-from typing import Optional
 
 from src.cli import TradingCLI, quick_order, run_cli
 from src.config.config import settings
