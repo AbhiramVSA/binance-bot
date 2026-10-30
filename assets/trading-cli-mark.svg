@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Command line trading chart</title>
+  <rect x="4" y="4" width="120" height="120" rx="30" fill="#192332"/>
+  <path d="M28 94V68m19 26V50m19 44V61m19 33V38m19 56V54" stroke="#71d8c3" stroke-linecap="round" stroke-width="9"/>
+  <path d="m27 45 21-13 18 11 21-18 20 9" fill="none" stroke="#f2bd67" stroke-linecap="round" stroke-linejoin="round" stroke-width="5"/>
+  <circle cx="27" cy="45" r="4" fill="#f2bd67"/><circle cx="47" cy="32" r="4" fill="#f2bd67"/><circle cx="66" cy="43" r="4" fill="#f2bd67"/><circle cx="87" cy="25" r="4" fill="#f2bd67"/><circle cx="107" cy="34" r="4" fill="#f2bd67"/>
+</svg>
