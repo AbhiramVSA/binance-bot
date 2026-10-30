@@ -261,7 +261,7 @@ graph TD
 ## Setup
 
 ```bash
-git clone https://github.com/yourusername/binance-bot.git
+git clone https://github.com/AbhiramVSA/binance-bot.git
 cd binance-bot
 python -m venv .venv && source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 pip install -e .
