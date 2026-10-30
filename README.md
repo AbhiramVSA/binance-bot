@@ -4,7 +4,7 @@
 
 <h1 align="center">Binance Futures Trading Bot</h1>
 
-A Python command-line client for Binance USDT-M Futures. It validates market, limit, and conditional orders, and uses testnet by default.
+<p align="center">A Python command-line client for Binance USDT-M Futures. It validates market, limit, and conditional orders, and uses testnet by default.</p>
 
 <p align="center">
   <a href="#quick-start">Quick start</a> ·
