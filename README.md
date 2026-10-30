@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/trading-cli-mark.svg" alt="Market bars beneath a connected price trace" width="112" />
+  <img src="assets/binance-bot-logo.png" alt="Terminal chart with automated trading gear" width="200" />
 </p>
 
 <h1 align="center">Binance Futures Trading Bot</h1>
