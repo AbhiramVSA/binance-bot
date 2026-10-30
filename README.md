@@ -1,6 +1,44 @@
-# Binance Futures Trading Bot
+<p align="center">
+  <img src="assets/trading-cli-mark.svg" alt="Market bars beneath a connected price trace" width="112" />
+</p>
 
-A command-line trading bot for Binance USDT-M Futures with support for market, limit, and conditional order types. Built with Python 3.10+, featuring HMAC-SHA256 request signing, input validation via Pydantic, and dual testnet/mainnet support.
+<h1 align="center">Binance Futures CLI</h1>
+
+A Python command-line client for Binance USDT-M Futures. It validates market, limit, and conditional orders, and uses testnet by default.
+
+<p align="center">
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#usage">Usage</a> ·
+  <a href="#architecture">Architecture</a> ·
+  <a href="#disclaimer">Risk</a>
+</p>
+
+## Quick start
+
+**Requirements:** Python 3.10 or later and API keys from the [Binance Futures Testnet](https://testnet.binancefuture.com/).
+
+```bash
+git clone https://github.com/AbhiramVSA/binance-bot.git
+cd binance-bot
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
+python -m pip install -r requirements.txt
+cp .env.example .env
+```
+
+Add the testnet credentials to `.env`, then start the guided CLI:
+
+```bash
+python main.py
+```
+
+Quick mode sends a testnet order when you provide the order details:
+
+```bash
+python main.py --quick -s BTCUSDT -S BUY -t MARKET -q 0.001
+```
+
+The `--mainnet` flag selects the live exchange. It uses real funds. Keep testnet enabled while you learn the command interface.
 
 ## Architecture
 
