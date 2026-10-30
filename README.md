@@ -2,7 +2,7 @@
   <img src="assets/trading-cli-mark.svg" alt="Market bars beneath a connected price trace" width="112" />
 </p>
 
-<h1 align="center">Binance Futures CLI</h1>
+<h1 align="center">Binance Futures Trading Bot</h1>
 
 A Python command-line client for Binance USDT-M Futures. It validates market, limit, and conditional orders, and uses testnet by default.
 
